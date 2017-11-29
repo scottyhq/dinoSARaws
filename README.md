@@ -1,2 +1,2 @@
-# dinoSARaws
-InSAR AWS Cloud Computing Tools
+# dinoSAR
+tools for InSAR processing on AWS
