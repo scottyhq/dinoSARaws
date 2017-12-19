@@ -18,7 +18,7 @@ dinoSARaws is an attempt to lay important groundwork for the transition to cloud
 
 
 ### How to run dinoSARaws?
-dinoSARaws assumes that you have familiarity with a linux terminal, an account with AWS, and a user agreement permitting use of [ISCE Software](https://winsar.unavco.org/isce.html). There is more detailed documentation in the $docs$ folder in this repository to set everything up. What follows is a quickstart tutorial for running on Ubuntu Linux.
+dinoSARaws assumes that you have familiarity with a linux terminal, an account with AWS, and a user agreement permitting use of [ISCE Software](https://winsar.unavco.org/isce.html). There is more detailed documentation in the [docs](./docs) folder in this repository to set everything up. What follows is a quickstart tutorial for running on Ubuntu Linux.
 
 Install Continuum Analytics Python distribution
 ```
