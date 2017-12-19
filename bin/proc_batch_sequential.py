@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Process a single interferogram via a CloudFormation script
+Process all adjacent interferograms for a particular region of interest.
 
-Note: intended for single interferogram processing. For batch processing
-figure out how to store common data and DEM on an EFS drive
 
-# EXAMPLE:
-proc_ifg_cfn.py -i c5.4xlarge -p 115 -m 20170927 -s 20150914 -n 2 -r 44.0 44.5 -122.0 -121.5 -g 44.0 44.5 -122.0 -121.5
+EXAMPLE:
+For example, a query.geojson with the following scenes:
+...
+20170927
+20170915
+20170903
+20170812
+...
 
-c4.4xlarge t2.2xlarge c5.4xlarge c5.9xlarge 
+proc_batch_sequential.py -p 115 -n 2 -r 44.0 44.5 -122.0 -121.5 -g 44.0 44.5 -122.0 -121.5
 
-# Archived Files:
-*xml *log
-#filt_topophase.unw* filt_topophase.flat* dem.crop* los.rdr.geo* phsig.cor.geo* 
-# For now just stash entire meged directory
-
-Created on Sun Nov 19 16:26:27 2017
+# this will run topsApp.py for subswath 2, and region of interest defined by search
+# for the following pairs:
+int-20170927-20170915
+int-20170915-20170903
+int-20170903-20170812
 
 @author: scott
 """
@@ -35,8 +38,6 @@ def cmdLineParse():
             help='Slave date')
     parser.add_argument('-p', type=int, dest='path', required=True,
             help='Path/Track/RelativeOrbit Number')
-    parser.add_argument('-i', type=str, dest='instance', required=False, default='t2.micro',
-            help='EC2 instance type (c4.4xlarge, t2.micro...)')
     parser.add_argument('-n', type=int, nargs='+', dest='swaths', required=False,
 	        default=[1,2,3], choices=(1,2,3),
             help='Subswath numbers to process')
