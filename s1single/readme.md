@@ -18,8 +18,15 @@ Options:
 ```
 proc_ifg_cfn.py -i c5.4xlarge -p 115 -m 20170927 -s 20150908 -n 2 -r 44.0 44.5 -122.0 -121.5 -g 44.0 44.5 -122.0 -121.5
 ```
+* `-i` specifies the EC2 instance type
+* `-p` specifies orbital path number 115
+* `-m` specifies primary frame acquisition date
+* `-s` specifies secondary frame acquisition date
+* `-n` specifies subswath to process (to process all three input -n 1 2 3)
+* `-r` specifies the region of interest for processing
+* `-g` specifices the geocoding bounding box for ISCE outputs
 
-This command launches computation resources on Amazon Web Services via the [AWS CloudFormation](https://aws.amazon.com/cloudformation). Essentially, the script writes a YML file (proc-20170927-20150908.yml) that specifies which computational resources to launch. In particular, a `c5.4xlarge` [EC2 Instance](https://aws.amazon.com/ec2/instance-types) computer, with a custom Amazon Machine Image (Ubuntu 16.04 with ISCE software pre-installed. The file also specifies security settings (RSA key) and additional attached storage for running ISCE (a 100Gb [EBS drive](https://aws.amazon.com/ebs/). Finally, a 'UserData' bash script is included at the end of the file, which runs ISCE and shuts everything down when finished. Below is a copy of what the script looks like and an explanation:
+This command launches computation resources on Amazon Web Services via the [AWS CloudFormation](https://aws.amazon.com/cloudformation). Essentially, the script writes a YML file (proc-20170927-20150908.yml) that specifies which computational resources to launch. In particular, a `c5.4xlarge` [EC2 Instance](https://aws.amazon.com/ec2/instance-types), with a custom Amazon Machine Image (Ubuntu 16.04 with ISCE software pre-installed). The file also specifies security settings (RSA key) and additional attached storage for running ISCE (a 100Gb [EBS drive](https://aws.amazon.com/ebs/)). Finally, a 'UserData' bash script is included at the end of the file, which runs ISCE and shuts everything down when finished. Below is a copy of the bash script:
 
 ```
 #!/bin/bash
