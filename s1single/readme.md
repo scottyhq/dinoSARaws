@@ -62,9 +62,6 @@ aws s3 mb s3://int-20170927-20160908
 cp *xml *log merged
 aws s3 sync merged/ s3://int-20170927-20160908/
 
-# Email notification (NOTE: set up SNS to do this)
-#aws sns publish --topic-arn "arn:aws:sns:us-west-2:295426338758:email-me" --message file://topsApp.log --subject "int-20170927-20160908 Finished"
-
 #Close down everything
 aws cloudformation delete-stack --stack-name proc-20170927-20160908
 ```
