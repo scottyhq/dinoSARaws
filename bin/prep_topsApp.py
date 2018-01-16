@@ -32,7 +32,7 @@ def cmdLineParse():
             help='Master date')
     parser.add_argument('-s', type=str, dest='slave', required=True,
             help='Slave date')
-    parser.add_argument('-p', type=int, dest='path', required=True,
+    parser.add_argument('-p', type=str, dest='path', required=True,
             help='Path/Track/RelativeOrbit Number')
     parser.add_argument('-n', type=int, nargs='+', dest='swaths', required=False,
 	        default=[1,2,3], choices=(1,2,3),
@@ -60,12 +60,14 @@ def download_scene(downloadUrl):
     '''
     aria2c --http-auth-challenge=true --http-user=CHANGE_ME --http-passwd='CHANGE_ME' "https://api.daac.asf.alaska.edu/services/search/param?granule_list=S1A_EW_GRDM_1SDH_20151003T040339_20151003T040351_007983_00B2A6_7377&output=metalink"
     '''
+    print('pwd:', os.getcwd())
     print('Downloading frame from ASF...')
     print('Requires ~/.netrc file:  ')
     print('See: https://winsar.unavco.org/software/release_note_isce-2.1.0.txt')
     cmd = 'wget -q -nc -c {}'.format(downloadUrl) #nc won't overwrite. -c continuous if unfinished -q is for 'quiet mode' since many incremental download % updates go to /var/log/cloud-init-output.log
     print(cmd)
     os.system(cmd)
+    print('Done downloading')
 
 
 def load_inventory(vectorFile):
@@ -86,27 +88,32 @@ def download_orbit(granuleName):
     Grab orbit files from ASF
     '''
     cwd = os.getcwd()
-    os.chdir(os.environ['POEORB'])
-    sat = granuleName[:3]
-    date = granuleName[17:25]
-    print('downloading orbit for {}, {}'.format(sat,date))
+    try:
+        os.chdir(os.environ['POEORB'])
+        sat = granuleName[:3]
+        date = granuleName[17:25]
+        print('downloading orbit for {}, {}'.format(sat,date))
 
-    url = 'https://s1qc.asf.alaska.edu/aux_poeorb'
-    r = requests.get(url)
-    webpage = html.fromstring(r.content)
-    orbits = webpage.xpath('//a/@href')
-    # get s1A or s1B
-    df = gpd.pd.DataFrame(dict(orbit=orbits))
-    dfSat = df[df.orbit.str.startswith(sat)]
-    dayBefore = gpd.pd.to_datetime(date) - gpd.pd.to_timedelta(1, unit='d')
-    dayBeforeStr = dayBefore.strftime('%Y%m%d')
-    # get matching orbit file
-    dfSat['startTime'] = dfSat.orbit.str[42:50]
-    match = dfSat.loc[dfSat.startTime == dayBeforeStr, 'orbit'].values[0]
-    cmd = 'wget -q -nc {}/{}'.format(url,match) #-nc means no clobber
-    print(cmd)
-    os.system(cmd)
-    os.chdir(cwd)
+        url = 'https://s1qc.asf.alaska.edu/aux_poeorb'
+        r = requests.get(url)
+        webpage = html.fromstring(r.content)
+        orbits = webpage.xpath('//a/@href')
+        # get s1A or s1B
+        df = gpd.pd.DataFrame(dict(orbit=orbits))
+        dfSat = df[df.orbit.str.startswith(sat)]
+        dayBefore = gpd.pd.to_datetime(date) - gpd.pd.to_timedelta(1, unit='d')
+        dayBeforeStr = dayBefore.strftime('%Y%m%d')
+        # get matching orbit file
+        dfSat['startTime'] = dfSat.orbit.str[42:50]
+        match = dfSat.loc[dfSat.startTime == dayBeforeStr, 'orbit'].values[0]
+        cmd = 'wget -q -nc {}/{}'.format(url,match) #-nc means no clobber
+        print(cmd)
+        os.system(cmd)
+    except Exception as e:
+        print('Trouble downloading POEORB... maybe scene is too recent?')
+        print(e)
+        pass
+    os.chdir(cwd) #NOTE: best to specifiy download dir instead of jumping cwd around...
 
 
 def download_auxcal():
@@ -129,8 +136,7 @@ def find_scenes(gf, dateStr, relativeOrbit, download=True):
     Get downloadUrls for a given date
     '''
     GF = gf.query('relativeOrbit == @relativeOrbit')
-    GF = gf.loc[ gf.dateStamp == dateStr ]
-
+    GF = GF.loc[ GF.dateStamp == dateStr ]
     if download:
         for i,row in GF.iterrows():
             download_scene(row.downloadUrl)
@@ -195,7 +201,16 @@ if __name__ == '__main__':
         os.mkdir(intdir)
     os.chdir(intdir)
     download_auxcal()
-    inps.master_scenes = find_scenes(gf, inps.master, inps.path, download=True)
-    inps.slave_scenes = find_scenes(gf, inps.slave, inps.path, download=True)
+    try:
+        inps.master_scenes = find_scenes(gf, inps.master, inps.path, download=True)
+    except Exception as e:
+        print('ERROR retrieving master scenes, double check dates:')
+        #print(e)
+        raise
+    try:
+        inps.slave_scenes = find_scenes(gf, inps.slave, inps.path, download=True)
+    except Exception as e:
+        print('ERROR retrieving slave scenes, double check dates:')
+        raise
     write_topsApp_xml(inps)
     print('Ready to run topsApp.py in {}'.format(intdir))
