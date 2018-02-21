@@ -136,6 +136,8 @@ def summarize_inventory(gf):
     dfS.index.name = 'Orbit'
     dfS.to_csv('inventory_summary.csv')
     print(dfS)
+    size = dfS.Frames.sum()*5 / 1e3
+    print('Approximate Archive size = {} Tb'.format(size))
 
 
 def merge_inventories(s1Afile, s1Bfile):
