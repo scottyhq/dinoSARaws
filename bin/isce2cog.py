@@ -54,3 +54,6 @@ if __name__ == '__main__':
         clean_up()
 
     print('Done!')
+    print('Run these to move files to S3:')
+    print('aws s3 mb s3://int-[date1]-[date2]')
+    print('aws s3 sync . s3://int-[date1]-[date2] --exclude "*" --include "*cog.tif" ')
