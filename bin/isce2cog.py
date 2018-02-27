@@ -41,7 +41,8 @@ def clean_up():
 if __name__ == '__main__':
     conversions = {'amplitude-cog.tif' : ('filt_topophase.unw.geo.vrt',1),
                    'unwrapped-phase-cog.tif' : ('filt_topophase.unw.geo.vrt',2),
-                   'coherence-cog.tif' : ('phsig.cor.geo.vrt',1),
+                   #'coherence-cog.tif' : ('phsig.cor.geo.vrt',1),
+                   'coherence-cog.tif' : ('topophase.cor.geo.vrt',1),
                    'incidence-cog.tif' : ('los.rdr.geo.vrt',1),
                    'heading-cog.tif' : ('los.rdr.geo.vrt',2),
                    'elevation-cog.tif' : ('dem.crop.vrt',1)}
