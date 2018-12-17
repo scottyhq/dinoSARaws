@@ -1,3 +1,6 @@
+# **NOTE: moving development to new repository: https://github.com/scottyhq/dinosar)**
+
+
 # dinoSARaws
 Interferometric Synthetic Aperture Radar (InSAR) processing with Amazon Web Services (AWS)
 
