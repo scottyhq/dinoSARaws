@@ -28,10 +28,10 @@ def cmdLineParse():
     parser = argparse.ArgumentParser( description='prepare ISCE 2.1 topsApp.py')
     parser.add_argument('-i', type=str, dest='inventory', required=True,
             help='Inventory vector file (query.geojson)')
-    parser.add_argument('-m', type=str, dest='master', required=True,
-            help='Master date')
-    parser.add_argument('-s', type=str, dest='slave', required=True,
-            help='Slave date')
+    parser.add_argument('-m', type=str, dest='main', required=True,
+            help='Main date')
+    parser.add_argument('-s', type=str, dest='subordinate', required=True,
+            help='Subordinate date')
     parser.add_argument('-p', type=str, dest='path', required=True,
             help='Path/Track/RelativeOrbit Number')
     parser.add_argument('-n', type=int, nargs='+', dest='swaths', required=False,
@@ -159,17 +159,17 @@ def write_topsApp_xml(inps):
     #common['swath number'] = inps.subswath
     if inps.roi:
         common['region of interest'] = inps.roi
-    master = {}
-    master['safe'] = inps.master_scenes
-    master['output directory'] = 'masterdir'
-    master.update(common)
-    slave = {}
-    slave['safe'] = inps.slave_scenes
-    slave['output directory'] = 'slavedir'
-    slave.update(common)
+    main = {}
+    main['safe'] = inps.main_scenes
+    main['output directory'] = 'maindir'
+    main.update(common)
+    subordinate = {}
+    subordinate['safe'] = inps.subordinate_scenes
+    subordinate['output directory'] = 'subordinatedir'
+    subordinate.update(common)
     #####Set sub-component
-    insar['master'] = master
-    insar['slave'] = slave
+    insar['main'] = main
+    insar['subordinate'] = subordinate
     ####Set properties
     insar['sensor name'] = 'SENTINEL1'
     insar['do unwrap'] = True
@@ -196,21 +196,21 @@ if __name__ == '__main__':
 
     inps = cmdLineParse()
     gf = load_inventory(inps.inventory)
-    intdir = 'int-{0}-{1}'.format(inps.master, inps.slave)
+    intdir = 'int-{0}-{1}'.format(inps.main, inps.subordinate)
     if not os.path.isdir(intdir):
         os.mkdir(intdir)
     os.chdir(intdir)
     download_auxcal()
     try:
-        inps.master_scenes = find_scenes(gf, inps.master, inps.path, download=True)
+        inps.main_scenes = find_scenes(gf, inps.main, inps.path, download=True)
     except Exception as e:
-        print('ERROR retrieving master scenes, double check dates:')
+        print('ERROR retrieving main scenes, double check dates:')
         #print(e)
         raise
     try:
-        inps.slave_scenes = find_scenes(gf, inps.slave, inps.path, download=True)
+        inps.subordinate_scenes = find_scenes(gf, inps.subordinate, inps.path, download=True)
     except Exception as e:
-        print('ERROR retrieving slave scenes, double check dates:')
+        print('ERROR retrieving subordinate scenes, double check dates:')
         raise
     write_topsApp_xml(inps)
     print('Ready to run topsApp.py in {}'.format(intdir))

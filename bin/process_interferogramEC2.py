@@ -31,10 +31,10 @@ def cmdLineParse():
     Command line parser.
     '''
     parser = argparse.ArgumentParser( description='prepare ISCE 2.1 topsApp.py')
-    parser.add_argument('-m', type=str, dest='master', required=True,
-            help='Master date')
-    parser.add_argument('-s', type=str, dest='slave', required=True,
-            help='Slave date')
+    parser.add_argument('-m', type=str, dest='main', required=True,
+            help='Main date')
+    parser.add_argument('-s', type=str, dest='subordinate', required=True,
+            help='Subordinate date')
     parser.add_argument('-p', type=int, dest='path', required=True,
             help='Path/Track/RelativeOrbit Number')
     parser.add_argument('-n', type=int, nargs='+', dest='swaths', required=False,
@@ -77,16 +77,16 @@ echo $PATH
 get_inventory_asf.py -r {roi}
 
 # Prepare interferogram directory
-prep_topsApp.py -i query.geojson -m {master} -s {slave} -n {swaths} -r {roi} -g {gbox}
+prep_topsApp.py -i query.geojson -m {main} -s {subordinate} -n {swaths} -r {roi} -g {gbox}
 
 # Run code
-cd int_{master}_{slave}
+cd int_{main}_{subordinate}
 topsApp.py 2>&1 | tee topsApp.log
 
 # Create S3 bucket and save results
-aws s3 mb s3://int-{master}-{slave}
+aws s3 mb s3://int-{main}-{subordinate}
 cp *xml *log merged
-aws s3 sync merged/ s3://int-{master}-{slave}/ 
+aws s3 sync merged/ s3://int-{main}-{subordinate}/ 
 
 # Close instance
 echo "Finished interferogram... shutting down"

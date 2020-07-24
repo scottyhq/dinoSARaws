@@ -29,10 +29,10 @@ def cmdLineParse():
     Command line parser.
     '''
     parser = argparse.ArgumentParser( description='prepare ISCE 2.1 topsApp.py')
-    parser.add_argument('-m', type=str, dest='master', required=True,
-            help='Master date')
-    parser.add_argument('-s', type=str, dest='slave', required=True,
-            help='Slave date')
+    parser.add_argument('-m', type=str, dest='main', required=True,
+            help='Main date')
+    parser.add_argument('-s', type=str, dest='subordinate', required=True,
+            help='Subordinate date')
     parser.add_argument('-p', type=int, dest='path', required=True,
             help='Path/Track/RelativeOrbit Number')
     parser.add_argument('-i', type=str, dest='instance', required=False, default='t2.micro',
@@ -56,10 +56,10 @@ def create_cloudformation_script(inps):
     Write YML file to process and interferogram based on user input
     NOTE: could probably do this better w/ JSON tools...
     '''
-    filename = 'proc-{master}-{slave}.yml'.format(**vars(inps))
+    filename = 'proc-{main}-{subordinate}.yml'.format(**vars(inps))
     with open(filename, 'w') as yml:
         yml.write('''AWSTemplateFormatVersion: "2010-09-09"
-Description: "CloudFormation template to create interferogram: int-{master}-{slave}"
+Description: "CloudFormation template to create interferogram: int-{main}-{subordinate}"
 Resources:
   MyEC2Instance:
     Type: "AWS::EC2::Instance"
@@ -108,19 +108,19 @@ Resources:
           # Download inventory file
           get_inventory_asf.py -r {roi}
           # Prepare interferogram directory
-          prep_topsApp.py -i query.geojson -p {path} -m {master} -s {slave} -n {swaths} -r {roi} -g {gbox}
+          prep_topsApp.py -i query.geojson -p {path} -m {main} -s {subordinate} -n {swaths} -r {roi} -g {gbox}
           # Run code
-          cd int-{master}-{slave}
+          cd int-{main}-{subordinate}
           topsApp.py 2>&1 | tee topsApp.log
           # Create S3 bucket and save results
-          aws s3 mb s3://int-{master}-{slave}
+          aws s3 mb s3://int-{main}-{subordinate}
           cp *xml *log merged
-          aws s3 sync merged/ s3://int-{master}-{slave}/ 
+          aws s3 sync merged/ s3://int-{main}-{subordinate}/ 
           # Close instance
           #echo "Finished interferogram... shutting down"
           #shutdown #doesn't close entire stack, just EC2
-          aws sns publish --topic-arn "arn:aws:sns:us-west-2:295426338758:email-me" --message file://topsApp.log --subject "int-{master}-{slave} Finished"
-          aws cloudformation delete-stack --stack-name proc-{master}-{slave}
+          aws sns publish --topic-arn "arn:aws:sns:us-west-2:295426338758:email-me" --message file://topsApp.log --subject "int-{main}-{subordinate} Finished"
+          aws cloudformation delete-stack --stack-name proc-{main}-{subordinate}
           EOF
 '''.format(**vars(inps)))
 
