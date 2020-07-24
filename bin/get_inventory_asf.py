@@ -98,10 +98,10 @@ def summarize_orbits(gf):
         #DF.set_index('date') # convert to datetime difference
         DF.to_csv('acquisitions_{}.csv'.format(orb))
 
-def save_shapefiles(gf, master, slave):
+def save_shapefiles(gf, main, subordinate):
     '''
     NOTE: alernative is to use shapely/geopandas to check overlapping area
-    Save shapefiles of master & slave to confirm overlap in GE
+    Save shapefiles of main & subordinate to confirm overlap in GE
     '''
     print('TODO')
 
